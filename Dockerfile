@@ -1,32 +1,35 @@
-# Step 1: Use official PHP 8.2 image with FPM (FastCGI Process Manager)
+# Base PHP image
 FROM php:8.2-fpm
 
-# Step 2: Install system dependencies and PHP extensions required for Laravel
+# Install system dependencies
 RUN apt-get update && apt-get install -y \
-    git curl zip unzip libpng-dev libonig-dev libxml2-dev \
-    libzip-dev libpq-dev
+    git curl zip unzip libpng-dev libonig-dev libxml2-dev libzip-dev libpq-dev \
+    nodejs npm
 
-# Install PHP extensions required for Laravel
+# Install PHP extensions
 RUN docker-php-ext-install pdo pdo_mysql mbstring exif pcntl bcmath gd zip
 
-# Step 3: Install Composer globally
+# Install Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-# Step 4: Set the working directory inside the container
+# Set working directory
 WORKDIR /var/www
 
-# Step 5: Copy the Laravel project files to the container
+# Copy project files
 COPY . .
 
-# Step 6: Install the Laravel project dependencies using Composer
+# Install PHP dependencies
 RUN composer install --no-dev --optimize-autoloader
 
-# Step 7: Set permissions to avoid any permission issues
+# Install JS dependencies and build assets
+RUN npm install && npm run build
+
+# Set permissions
 RUN chown -R www-data:www-data /var/www
 
-# Step 8: Expose port 8080 to make it accessible
+# Expose port
 EXPOSE 8080
 
-# Step 9: Run the Laravel development server
-CMD php artisan migrate --force && php artisan serve --host=0.0.0.0 --port=8080
+# Start Laravel server
+CMD ["php", "artisan", "serve", "--host=0.0.0.0", "--port=8080"]
 
