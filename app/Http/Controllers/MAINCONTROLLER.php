@@ -103,7 +103,7 @@ class MAINCONTROLLER extends Controller
     {
         $cusall = customer::paginate(10); // Fetch all student results
         // dd($cusall);
-        return view('customerEntry', compact('cusall'));
+        return view('CustomerEntry', compact('cusall'));
     }
 
 
